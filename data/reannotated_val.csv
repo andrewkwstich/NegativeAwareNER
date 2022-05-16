@@ -1,4 +1,4 @@
-,Tokens,X,O,Tags,is_negative
+,Tokens,X,_,Tags,is_negative
 0,I,-X-,_,O,False
 1,am,-X-,_,O,False
 2,looking,-X-,_,O,False
