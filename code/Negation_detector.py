@@ -40,6 +40,8 @@ data["is_negative"] = is_negative
 
 
 def get_triples(df):
+    """Takes a df of the form given by the dev data csv and an is_negative column and outputs a list of lists.
+    Each list represents a sentence whose members are tuples of the form (word, iob, negation)"""
     
     current_sent = []
     
@@ -57,6 +59,7 @@ def get_triples(df):
 
 
 def change_to_io(triples):
+    """Given a list of sentences output by `get_triples`, replace B-tags wiith I-tags."""
     for sent in triples:
         for i, word in enumerate(sent):
             if word[1].startswith("B"):
@@ -76,6 +79,22 @@ for sent in all_sents:
             break
 
 def transform_sentence(sent, for_evaluation=False):
+
+    """
+    If for_evaluation=False: Given a sentence prepared with `get_triples`, outputs a list of lists;
+    each list is a series of continuous words belonging to the same Outside portion of the sentence
+    or to the same product/attribute/etc. Also outputs a list of indices, each index corresponding
+    to a sublist that contains the tokens corresponding to an entity.
+    
+    >>> transform_sentence([("This", "O", False), ("is", "O", False), ("not", "O", "False"), ("a", "O", False), ("red", "I-COLOR", True), ("shirt", "I-PRODUCT", False)])
+    [["This", "is", "a"], ["red"], ["shirt"]], [1, 2]
+
+    If for_evaluation=True: Returns a list of positive entity names and a list of negative entity names.
+
+    >>> transform_sentence([("This", "O", False), ("is", "O", False), ("not", "O", "False"), ("a", "O", False), ("red", "I-COLOR", True), ("shirt", "I-PRODUCT", False)],
+    for_evaluation=True)
+    ["shirt"], ["red"]
+    """
     
     list_counter = 0
 
@@ -158,7 +177,16 @@ def transform_sentence(sent, for_evaluation=False):
 
 
 def prepare_gold_data(sent_list, output_style="tags", word_of_interest=None):
-    
+    """
+    Given a list of sentences prepared with `get_triples`:
+    If `output_style="tags"`, outputs a list of lists, with each list representing a sentence as a sequence of
+    True (negated) or False (not negated) at each sentence index.
+
+    If `output_style="entities"`, outputs `pos_ents` and `neg_ents`, each of which contains a list of positive and negative
+    entities for each sentence.
+
+    If `word_of_interest` is supplied, filters the sentences to ones including that word (as a string).
+    """
     if word_of_interest:
         active_list = []
         for sent in sent_list:
@@ -192,6 +220,11 @@ def prepare_gold_data(sent_list, output_style="tags", word_of_interest=None):
 
 
 def evaluate(preds, gold, input_style="tags", verbose=False):
+    """Calculates the F1 score and other metrics for predictions.
+    If `input_style="tags"`, preds and gold are a list of sentences represented as a sequence of True (negated)
+    and False (non-negated).
+    If `input_style="entities"`, preds and gold each contain two lists: the positive entities and the negative entities for each sentence.
+    """
     
     total = 0
     true_pos = 0
@@ -281,7 +314,8 @@ def evaluate(preds, gold, input_style="tags", verbose=False):
 
 
 def get_spacy_tokens(transformed_sent, entity_indices):
-    """Maps entity indices to indices in a spacy object."""
+    """Maps entity indices to indices in a spacy object.
+    `transformed_sent` and `entity_indices` are the two outputs of `transform_sentence`."""
     
     ent_2_spacy = {}
     string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
@@ -342,6 +376,10 @@ def get_spacy_tokens(transformed_sent, entity_indices):
     return ent_2_spacy
 
 def predict_one_sentence(sent, negators, output_style="tags", word_of_interest=None, verbose=False):
+    """Given a sentence provided by `get_triples` and a list of negator functions, make a prediction for the sentence.
+    If `output_style="tags"`, outputs a sequence of True (negated) and False (non-negated).
+    If `output_style="entities"`, outputs a list of positive entities and a list of negative entities.
+    """
     
     if len(sent[0]) == 3:
         active_sent = []
@@ -417,6 +455,8 @@ def predict_one_sentence(sent, negators, output_style="tags", word_of_interest=N
 
 
 def predict_sent_list(sent_list, negators, output_style="tags", word_of_interest=None):
+    """Creates a list of predictions by calling `predict_one_sentence` on each sentence with the appropriate `output_style`.
+    If a single-word string is supplied to `word_of_interest`, filters sentences in the list of sentences to ones which include that word."""
             
     if output_style == "tags":
         
@@ -444,6 +484,7 @@ def predict_sent_list(sent_list, negators, output_style="tags", word_of_interest
 
 
 def get_negator_output(transformed_sent, entity_indices, negated_indices, output_style):
+    """A helper function that gets the input into the right format for each of the negator functions (see below)."""
     
     if output_style == "tags":
         preds = []
@@ -462,6 +503,10 @@ def get_negator_output(transformed_sent, entity_indices, negated_indices, output
 
 
 def instead(transformed_sent, spacy_mapping, output_style="tags"):
+    """Detects entities that are negated by the word "instead".
+    `transformed_sent`: The first output of `transform_sentence` on the sentence represented as triples.
+    `spacy_mapping`: The output of `get_spacy_tokens` given `transformed_sent` and the associated entity indices.
+    `output_style`: If "tags", returns a series of True (negated) and False (non-negated), where each index is True if negated by "instead"."""
     
     string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
     
@@ -492,31 +537,11 @@ def instead(transformed_sent, spacy_mapping, output_style="tags"):
     return get_negator_output(transformed_sent, spacy_mapping.keys(), negated_indices, output_style)
 
 
-
-def no(transformed_sent, spacy_mapping, output_style="tags"):
-    string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
-    
-    doc = nlp(string_sent)
-    
-    negated_indices = []
-    
-    for ent_idx, spacy_idx in spacy_mapping.items():
-        i = spacy_idx
-        negated = False
-        for j in range(3):
-            if i - j >= 0:
-                if doc[i-j].text.lower() == "no":
-                    negated = True
-                if doc[i-j].pos_ not in ["ADJ", "NOUN"]:
-                    break
-        if negated:
-            negated_indices.append(ent_idx)
-                                                        
-    return get_negator_output(transformed_sent, spacy_mapping.keys(), negated_indices, output_style)
-
-
-
 def more_less_than(transformed_sent, spacy_mapping, output_style="tags"):
+    """Detects entities that are negated by the words "more" or "less" and "than".
+    `transformed_sent`: The first output of `transform_sentence` on the sentence represented as triples.
+    `spacy_mapping`: The output of `get_spacy_tokens` given `transformed_sent` and the associated entity indices.
+    `output_style`: If "tags", returns a series of True (negated) and False (non-negated), where each index is True if negated by "more/less" + "than"."""
     
     string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
         
@@ -540,6 +565,10 @@ def more_less_than(transformed_sent, spacy_mapping, output_style="tags"):
 
 
 def without(transformed_sent, spacy_mapping, output_style="tags"):
+    """Detects entities that are negated by the word "without".
+    `transformed_sent`: The first output of `transform_sentence` on the sentence represented as triples.
+    `spacy_mapping`: The output of `get_spacy_tokens` given `transformed_sent` and the associated entity indices.
+    `output_style`: If "tags", returns a series of True (negated) and False (non-negated), where each index is True if negated by "without"."""
     
     string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
     
@@ -574,6 +603,10 @@ def without(transformed_sent, spacy_mapping, output_style="tags"):
 
 
 def not_(transformed_sent, spacy_mapping, output_style="tags"):
+    """Detects entities that are negated by "no", "not", and cliticized versions of the latter.
+    `transformed_sent`: The first output of `transform_sentence` on the sentence represented as triples.
+    `spacy_mapping`: The output of `get_spacy_tokens` given `transformed_sent` and the associated entity indices.
+    `output_style`: If "tags", returns a series of True (negated) and False (non-negated), where each index is True if negated by "no" or "not"."""
         
     string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
     
@@ -639,6 +672,10 @@ def not_(transformed_sent, spacy_mapping, output_style="tags"):
 
 
 def verbs(transformed_sent, spacy_mapping, output_style="tags"):
+    """Detects entities that are negated by the verbs "replace" and "remove" (in passive voice).
+    `transformed_sent`: The first output of `transform_sentence` on the sentence represented as triples.
+    `spacy_mapping`: The output of `get_spacy_tokens` given `transformed_sent` and the associated entity indices.
+    `output_style`: If "tags", returns a series of True (negated) and False (non-negated), where each index is True if negated by the above verbs."""
     
     string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
     
@@ -665,6 +702,10 @@ def verbs(transformed_sent, spacy_mapping, output_style="tags"):
 
 
 def comparative(transformed_sent, spacy_mapping, output_style="tags"):
+    """Detects entities that are negated by comparatives such as "bigger".
+    `transformed_sent`: The first output of `transform_sentence` on the sentence represented as triples.
+    `spacy_mapping`: The output of `get_spacy_tokens` given `transformed_sent` and the associated entity indices.
+    `output_style`: If "tags", returns a series of True (negated) and False (non-negated), where each index is True if negated by a comparative."""
     
     string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
     
@@ -696,6 +737,7 @@ def comparative(transformed_sent, spacy_mapping, output_style="tags"):
 
 
 def predict_and_evaluate(sent_list, negators, output_type="tags", word_of_interest=None, verbose=False):
+    """Given a list of sentences and `output_type`, simultaneously makes predictions and compares against the gold data."""
 
     preds = predict_sent_list(sent_list, negators, output_type, word_of_interest)
     gold = prepare_gold_data(sent_list, output_type, word_of_interest)
@@ -710,16 +752,6 @@ predict_and_evaluate(all_sents, negators, "entities", None, True)
 predict_and_evaluate(all_sents, negators, "tags", None, True)
 # print(all_sents)
 # pred_neg = predict_one_sentence([("I","O", False), ("want","O", False), ("a","O", False), ("red","I-ATTRIBUTE", False), ("shirt","I-PRODUCT", False), ("but","O", False), ("not","O", False), ("blue","I-ATTRIBUTE", False), ("is","O", False), ("okay","O", False)], negators, "entities", None, True)
-
-
-def get_woi(sent_list, woi):
-    out = []
-    for sent in sent_list:
-        for word, iob, neg in sent:
-            if word == woi:
-                out.append(sent)
-                break
-    return out
 
 def predict(taggedTokens, outputStyle="entities"):
     pred_neg = predict_one_sentence(taggedTokens, negators, outputStyle, None, True)
