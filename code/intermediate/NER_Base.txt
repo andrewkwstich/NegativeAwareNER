@@ -1,0 +1,108 @@
+!pip install --user flair
+
+from flair.data import Sentence
+from flair.models import SequenceTagger
+
+# load tagger
+tagger = SequenceTagger.load("flair/ner-english-ontonotes-large")
+
+
+
+
+# make example sentence
+sentence = Sentence("On September 1st George won 1 dollar while watching Game of Thrones.")
+
+# predict NER tags
+tagger.predict(sentence)
+
+# print sentence
+print(sentence)
+
+for word in sentence:
+  print(word.text)
+# print predicted NER spans
+print('The following NER tags are found:')
+
+ner_tags = {}
+# iterate over entities and print
+for entity in sentence.get_spans('ner'):
+    for token in entity.tokens:
+      print(token.idx)
+      print(token.text)
+      print(entity.tag)
+      ner_tags[token.text] = entity.tag
+    # print((entity))
+    # print(entity.text)
+    # print(entity.tag)
+ner_tags
+
+import pandas as pd
+
+un_neg_data= pd.read_csv("/content/unnegated_Sentence_tags.csv")
+un_neg_clean_data= pd.read_csv("/content/un-negated_clean_data.csv")
+un_neg_clean_data[un_neg_clean_data["sentence"]==1]
+
+colors = pd.read_csv("/content/colors.csv")
+col_set = set(colors["air_force_blue_raf"])
+
+"blue" in col_set
+
+un_neg_data
+
+un_neg_data.iloc[0]["Tags"].split(',')
+
+from collections import defaultdict
+actual = []
+predicted = []
+pred_ner = defaultdict(list)
+for  id, row in un_neg_data.iterrows():
+    print(row["Sentence"])
+    # print(row["Tags"])
+    tags = row["Tags"].split(',')
+    # make example sentence
+    sentence = Sentence(row["Sentence"])
+
+    # predict NER tags
+    tagger.predict(sentence)
+
+    ner_tags = {}
+    # iterate over entities and print
+    for entity in sentence.get_spans('ner'):
+        for token in entity.tokens:
+          ner_tags[token.idx-1] = entity.tag
+    
+    print(tags)
+    for i,word in enumerate(sentence):
+        # print(f"{i} {word.text}")
+        tok = word.text
+        if tok.lower() in col_set:
+          tag = "COLOUR"
+        else:
+          tag = ner_tags.get(i,'O')
+        if tag == "CARDINAL":
+            tag = "QUANTITY"
+        pred_ner[tag].append(tok)
+        if i < len(tags):
+          a = tags[i]
+          if '-' in a:
+            a = a.split('-')[1]
+          if a == 'SIZE':
+            a = 'QUANTITY'
+          if a == 'PRICE':
+            a = 'MONEY'
+          actual.append(a)
+          predicted.append(tag)
+        print(f"{tok} {a} {tag}")
+        
+    print("********")
+
+for k in pred_ner.keys():
+  if k != 'O':
+    print(f"{k} : {pred_ner[k]}")
+
+# from seqeval.metrics import classification_report
+from sklearn.metrics import f1_score, classification_report
+
+print(classification_report(actual, predicted ))
+
+
