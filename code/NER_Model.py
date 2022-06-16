@@ -1,3 +1,4 @@
+### Imports
 
 import pandas as pd
 import os
@@ -19,6 +20,7 @@ from spacy.lang.en import English
 import spacy
 import contextualSpellCheck
 
+## Model
 crf = sklearn_crfsuite.CRF(
         algorithm='lbfgs',
         c1=0.1,
@@ -29,8 +31,9 @@ crf = sklearn_crfsuite.CRF(
     )
 
 
-# ### Creating features using knowledge bases
+### Creating features using knowledge bases
 
+#### Colour List
 colors = pd.read_csv("data/colors.csv")
 
 
@@ -38,7 +41,7 @@ color_list= []
 for index, row in colors.iterrows():
     color_list.append(row['Air Force Blue (Raf)'])
 
-
+#### Product List
 products = pd.read_csv('data/products.csv',sep='\t')
 
 product_list =[]
@@ -54,73 +57,89 @@ product_list = set(product_list)
 product_list = list(product_list)
 
 
-# ### Feature Engineering
+### Feature Engineering
 
 
 def get_pos(word):
+    ''' Returns the POS tag of the word'''
     tag = nltk.pos_tag([word])
     return tag[0][1]
 
 def is_number(string):
+    '''Returns if the passed string is a digit or not'''
     return any(char.isdigit() for char in string)
 
 def word2features(sentence, idx):
     word_features = {}
     word_features['word_lowercase'] = sentence[idx].lower()
 
-    ## Features looking at the neighbouring words:
+    #### Features looking at the neighbouring words:
+
+    ##### Previous word
     if idx > 0:
         word_features["pre_word"] = sentence[idx -1].lower()
     else:
         word_features["pre_word"] = ""
+
+    ##### Next word
     if idx < len(sentence) - 1:
         word_features["next_word"] = sentence[idx +1].lower()
     else:
         word_features["next_word"] = ""
-        
+
+    ##### Second previous word    
     if idx > 1:
         word_features["pre2_word"] = sentence[idx -2].lower()
     else:
         word_features["pre2_word"] = ""
-        
+
+    ##### Second Next word    
     if idx < len(sentence) - 2:
         word_features["next2_word"] = sentence[idx +2].lower()
     else:
         word_features["next2_word"] = ""
-    ## Features loking at the word endings
+
+    #### Features loking at the word endings
     
+    ##### Last 2 characters
     if len(sentence[idx])> 2:
         word_features["last2char"] = sentence[idx][-2:]
     else:
         word_features["last2char"] = sentence[idx]
     
+    ##### Last 3 characters
     if len(sentence[idx])> 3:
         word_features["last3char"] = sentence[idx][-3:]
     else:
         word_features["last3char"] = sentence[idx]
         
-    ## Features considering the shape of the word
+    #### Features considering the shape of the word
     
+    ##### Checks if Upper case
     if sentence[idx].isupper():
         word_features["upper"] = True
     else:
         word_features["upper"] = False  
-        
+
+    ##### Checks if Lower case    
     if sentence[idx].islower():
         word_features["lower"] = True
     else:
         word_features["lower"] = False 
     
+    ##### Length of the word
     word_features["length"] = len(sentence[idx])
+
+    ##### Position of the word
     word_features["position"] = idx
     
     
-    ## Extra Features:
+    #### Extra Features:
     
-    ## Is Number
+    ##### Checks if the word is a number
     word_features["number"] = is_number(sentence[idx])
     
-    ##Is_Noun
+    ##### Checks if the word is a noun
     
     if get_pos(sentence[idx])== "NN":
         word_features["is_noun"] = True
@@ -128,14 +147,14 @@ def word2features(sentence, idx):
         word_features["is_noun"] = False
     
 
-#     color Feature:
+    ##### Checks if the word is present in color list
     
     if sentence[idx].lower() in color_list:
         word_features["color"] = True
     else:
         word_features["color"] = False
         
-#     Product Feature:
+    ##### Checks if the word is present in product list
     
     if sentence[idx].lower() in product_list:
         word_features["product"] = True
@@ -143,8 +162,7 @@ def word2features(sentence, idx):
         word_features["product"] = False
 
 
-
-        
+    ##### Checks for title case    
     for i in range(len(sentence)):
         if i == idx and i != 0:
             word_features['first_word_not_in_title_case'] = sentence[idx].istitle()
@@ -160,7 +178,9 @@ def sentence2features(sentence):
     return [word2features(sentence, idx) for idx in range(len(sentence))]
 
 def main():
-    
+
+    '''Function for creating the datasets'''
+
     data= pd.read_csv('data/Heyday_trainingdata.csv')
 
     data['Sentence']= data[['Sentence_Index','Tokens','Tags']].groupby(['Sentence_Index'])['Tokens'].transform(lambda x: ' '.join(x))
@@ -173,7 +193,7 @@ def main():
 
     data = data.drop_duplicates().reset_index(drop=True)
 
-    # ### Loading the training and validation set
+    ##### Loading the training and validation set
 
     train_dataset= data
     test_dataset = pd.read_csv('data/un-negated_clean_data.csv')
@@ -207,11 +227,9 @@ def main():
         dev_sents.append((strsplit_sentence(row['Sentence']),strsplit_tags(row['Tags'])))
 
     def prepare_ner_feature_dicts(sents):
-        '''ner_files is a list of Ontonotes files with NER annotations. Returns feature dictionaries and 
-        IOB tags for each token in the entire dataset'''
+        '''Returns feature dictionaries and IO tags for each token in the entire dataset'''
         all_dicts = []
         all_tags = []
-        # your code here
         for tokens, tags in sents:
             all_dicts.append(sentence2features(tokens))
             all_tags.append(tags)
@@ -222,9 +240,8 @@ def main():
     train_dicts, train_tags = prepare_ner_feature_dicts(train_sents)
     dev_dicts, dev_tags = prepare_ner_feature_dicts(dev_sents)
 
-    # ### CRF Model
+    ##### Training the CRF model
 
-    
     crf.fit(train_dicts, train_tags)
     try:
         call_produces_an_error()
@@ -232,10 +249,11 @@ def main():
         pass
 
 
-    # ### Results on the validation set
+    ##### Results on the validation set
 
 
     def flatten(l):
+        ''' Returns a flattened list '''
         result = []
         for sub in l:
             result.extend(sub)
@@ -246,12 +264,8 @@ def main():
     print(f1_score(flatten(dev_tags), flatten(y_pred), average='micro'))
     print(classification_report(flatten(dev_tags), flatten(y_pred)))
 
-
-    #Convert a sentence into feature dictionary
-
-    # print(dev_sents)
    
-    # ### Tagging the Validation set
+    #### Tagging the Validation set
 
     val_set= pd.read_csv('data/un-negated_clean_data.csv')
 
@@ -269,6 +283,7 @@ def main():
     print(test_dataset)
 
 def predict(sentence, correct_spellings=True):
+    '''Predictions on the test set'''
     nlp = spacy.load('en_core_web_sm')
     contextualSpellCheck.add_to_pipe(nlp)
     input_str = sentence
