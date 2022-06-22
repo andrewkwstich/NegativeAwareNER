@@ -5,7 +5,7 @@ import NER_Model
 import Negation_Detector
 
 class Request(BaseModel):
-    message: str
+    message:str
     language:str = "English"
     correct_spellings:bool = True
     negationStyle:str = "entities"

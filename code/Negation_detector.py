@@ -756,11 +756,18 @@ predict_and_evaluate(all_sents, negators, "tags", None, True)
 def predict(taggedTokens, outputStyle="entities"):
     pred_neg = predict_one_sentence(taggedTokens, negators, outputStyle, None, True)
     result = {"tokens":[], "tags":[], "isNegative":[]}
+
     if outputStyle =="tags":
+        result = {"token-tags":[]}
         for tokentag, neg in zip(taggedTokens, pred_neg):
-            result["tokens"].append(tokentag[0])
-            result["tags"].append(tokentag[1])
-            result["isNegative"].append(neg)
+            tt = []
+            tt.append(tokentag[0])
+            tag = tokentag[1]
+            if result["isNegative"] is True:
+                tt.append(tag.replace('I-','I-N-'))
+            else:
+                tt.append(tag)
+            result['token-tags'].append(tt)
         return result
     elif outputStyle == "entities":
         entities = {"Desired":[], "Undesired":[]}
