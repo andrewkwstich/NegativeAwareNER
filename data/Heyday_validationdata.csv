@@ -5,7 +5,7 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 0,for,O
 0,a,O
 0,black,I-COLOUR
-0,gloss,I-SIZE
+0,gloss,I-MATERIAL
 0,33,I-SIZE
 0,inch,I-SIZE
 0,fireclay,I-ATTRIBUTE
@@ -31,8 +31,8 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 2,48,I-SIZE
 2,inch,I-SIZE
 2,glass,I-MATERIAL
-2,sliding,I-ATTRIBUTE
-2,goof,I-ATTRIBUTE
+2,sliding,I-PRODUCT
+2,goof,I-PRODUCT
 2,and,O
 2,a,O
 2,shower,I-PRODUCT
@@ -106,8 +106,8 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 6,to,O
 6,buy,O
 6,some,O
-6,throw,I-PRODUCT
-6,blankets.,I-PRODUCT
+6,throw,O
+6,blankets.,O
 6,Your,O
 6,website,O
 6,states,O
@@ -182,8 +182,8 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 9,you,O
 9,carry,O
 9,any,O
-9,oval,O
-9,tubs,O
+9,oval,I-PRODUCT
+9,tubs,I-PRODUCT
 9,in,O
 9,a,O
 9,matte,I-COLOUR
@@ -347,7 +347,7 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 17,with,O
 17,integrated,I-ATTRIBUTE
 17,sink,I-ATTRIBUTE
-17,&,I-ATTRIBUTE
+17,&,I-PRODUCT
 17,counter,I-PRODUCT
 17,top,I-PRODUCT
 17,with,O
@@ -356,7 +356,7 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 17,holes,O
 17,for,O
 17,the,O
-17,faucet,I-PRODUCT
+17,faucet,I-ATTRIBUTE
 17,as,O
 17,our,O
 17,faucets,O
@@ -394,8 +394,8 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 19,I,O
 19,don't,O
 19,want,O
-19,linen,I-PRODUCT
-19,cabinet,I-PRODUCT
+19,linen,I-ATTRIBUTE
+19,cabinet,I-ATTRIBUTE
 20,"Hello,",O
 20,I,O
 20,need,O
@@ -992,8 +992,8 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 66,looking,O
 66,for,O
 66,a,O
-66,left,I-ATTRIBUTE
-66,offset,I-ATTRIBUTE
+66,left,I-PRODUCT
+66,offset,I-PRODUCT
 66,vanity,I-PRODUCT
 66,set,I-PRODUCT
 66,up,O
@@ -1322,8 +1322,8 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 90,looking,O
 90,for,O
 90,a,O
-90,bomber,I-ATTRIBUTE
-90,style,I-ATTRIBUTE
+90,bomber,I-PRODUCT
+90,style,I-PRODUCT
 90,jacket,I-PRODUCT
 90,2,I-SIZE
 90,XS,I-SIZE
@@ -1574,7 +1574,7 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 103,any,O
 103,"72""",I-SIZE
 103,wide,I-SIZE
-103,vanities?,I-PRODUCT
+103,vanities?,O
 104,looking,O
 104,for,O
 104,shower,I-PRODUCT
@@ -1686,7 +1686,7 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 111,have,O
 111,accents,O
 111,of,O
-111,clear,I-COLOUR
+111,clear,O
 111,or,O
 111,silver,O
 111,glass,O
@@ -1788,7 +1788,7 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 120,storage,I-ATTRIBUTE
 120,but,O
 120,no,O
-120,sinc,I-ATTRIBUTE
+120,sinc,O
 121,I,O
 121,want,O
 121,just,O
@@ -2119,8 +2119,8 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 146,for,O
 146,a,O
 146,one,O
-146,piece,I-ATTRIBUTE
-146,toilet,I-ATTRIBUTE
+146,piece,O
+146,toilet,I-PRODUCT
 147,Do,O
 147,you,O
 147,have,O
@@ -2140,7 +2140,7 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 148,through?,O
 148,Like,O
 148,frosted,O
-148,glass,I-MATERIAL
+148,glass,O
 149,I,O
 149,don't,O
 149,need,O
@@ -2198,7 +2198,7 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 152,don't,O
 152,want,O
 152,a,O
-152,complete,I-PRODUCT
+152,complete,I-ATTRIBUTE
 152,vanity,I-PRODUCT
 152,just,O
 152,the,O
@@ -2284,8 +2284,8 @@ Sentence_Index,Tokens,Predicted_NER_Tags
 160,a,O
 160,bathtub,I-PRODUCT
 160,left,I-PRODUCT
-160,hand,O
-160,drain,O
+160,hand,I-PRODUCT
+160,drain,I-PRODUCT
 160,but,O
 160,square,O
 160,not,O

@@ -73,16 +73,16 @@ def is_number(string):
 def word2features(sentence, idx):
     word_features = {}
 
-    # zero, one, tenth_half, half_one, one_three, three_five, five_ten, greater_than_ten = new_crf_functions.get_sim_freq(sentence, idx, new_crf_functions.taxon_dict)
+    zero, one, tenth_half, half_one, one_three, three_five, five_ten, greater_than_ten = new_crf_functions.get_sim_freq(sentence, idx, new_crf_functions.taxon_dict)
 
-    # word_features['zero']  = zero
-    # word_features['one']  = one
-    # word_features['tenth_half']  = tenth_half
-    # word_features['half_one']  = half_one
-    # word_features['one_three']  = one_three
-    # word_features['three_five']  = three_five
-    # word_features['five_ten']  = five_ten
-    # word_features['greater_than_ten']  = greater_than_ten
+    word_features['zero']  = zero
+    word_features['one']  = one
+    word_features['tenth_half']  = tenth_half
+    word_features['half_one']  = half_one
+    word_features['one_three']  = one_three
+    word_features['three_five']  = three_five
+    word_features['five_ten']  = five_ten
+    word_features['greater_than_ten']  = greater_than_ten
 
     word_features['word_lowercase'] = sentence[idx].lower()
 
@@ -94,16 +94,16 @@ def word2features(sentence, idx):
     if idx > 0:
         # is_object =  new_crf_functions.is_object(sentence, idx-1)
         # word_features['pre_is_obj']  = is_object
-        # zero, one, tenth_half, half_one, one_three, three_five, five_ten, greater_than_ten = new_crf_functions.get_sim_freq(sentence, idx-1, new_crf_functions.taxon_dict)
+        zero, one, tenth_half, half_one, one_three, three_five, five_ten, greater_than_ten = new_crf_functions.get_sim_freq(sentence, idx-1, new_crf_functions.taxon_dict)
 
-        # word_features['pre_zero']  = zero
-        # word_features['pre_one']  = one
-        # word_features['pre_tenth_half']  = tenth_half
-        # word_features['pre_half_one']  = half_one
-        # word_features['pre_one_three']  = one_three
-        # word_features['pre_three_five']  = three_five
-        # word_features['pre_five_ten']  = five_ten
-        # word_features['pre_greater_than_ten']  = greater_than_ten
+        word_features['pre_zero']  = zero
+        word_features['pre_one']  = one
+        word_features['pre_tenth_half']  = tenth_half
+        word_features['pre_half_one']  = half_one
+        word_features['pre_one_three']  = one_three
+        word_features['pre_three_five']  = three_five
+        word_features['pre_five_ten']  = five_ten
+        word_features['pre_greater_than_ten']  = greater_than_ten
         word_features["pre_word"] = sentence[idx -1].lower()
     else:
         word_features["pre_word"] = ""
@@ -111,20 +111,20 @@ def word2features(sentence, idx):
     ##### Next word
     if idx < len(sentence) - 1:
         word_features["next_word"] = sentence[idx +1].lower()
-        # zero, one, tenth_half, half_one, one_three, three_five, five_ten, greater_than_ten = new_crf_functions.get_sim_freq(sentence, idx+1, new_crf_functions.taxon_dict)
+        zero, one, tenth_half, half_one, one_three, three_five, five_ten, greater_than_ten = new_crf_functions.get_sim_freq(sentence, idx+1, new_crf_functions.taxon_dict)
 
         # is_object =  new_crf_functions.is_object(sentence, idx+1)
         # word_features['post_is_obj']  = is_object
 
 
-        # word_features['post_zero']  = zero
-        # word_features['post_one']  = one
-        # word_features['post_tenth_half']  = tenth_half
-        # word_features['post_half_one']  = half_one
-        # word_features['post_one_three']  = one_three
-        # word_features['post_three_five']  = three_five
-        # word_features['post_five_ten']  = five_ten
-        # word_features['post_greater_than_ten']  = greater_than_ten
+        word_features['post_zero']  = zero
+        word_features['post_one']  = one
+        word_features['post_tenth_half']  = tenth_half
+        word_features['post_half_one']  = half_one
+        word_features['post_one_three']  = one_three
+        word_features['post_three_five']  = three_five
+        word_features['post_five_ten']  = five_ten
+        word_features['post_greater_than_ten']  = greater_than_ten
     else:
         word_features["next_word"] = ""
 
