@@ -763,7 +763,7 @@ def predict(taggedTokens, outputStyle="entities"):
             tt = []
             tt.append(tokentag[0])
             tag = tokentag[1]
-            if result["isNegative"] is True:
+            if neg is True:
                 tt.append(tag.replace('I-','I-N-'))
             else:
                 tt.append(tag)

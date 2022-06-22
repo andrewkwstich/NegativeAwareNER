@@ -8,7 +8,7 @@ class Request(BaseModel):
     message:str
     language:str = "English"
     correct_spellings:bool = True
-    negationStyle:str = "entities"
+    negationStyle:str = "tags"
 
 class Response(BaseModel):
     result:str
