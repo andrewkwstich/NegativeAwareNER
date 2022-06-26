@@ -14,7 +14,7 @@ from nltk.corpus import names,gazetteers
 from sklearn_crfsuite import CRF
 from sklearn_crfsuite.metrics import flat_f1_score, flat_classification_report
 import re
-
+import NER_Model_postprocessing
 import sklearn_crfsuite
 import csv
 from spacy.lang.en import English
@@ -335,11 +335,15 @@ def predict(sentence, correct_spellings=True):
     else:
         tokens = [token.text for token in doc]
     
-    print(tokens)
+    print(f"Conversion after spell check : {tokens}")
 
     feat = sentence2features(tokens)
+
+    print(f"Extracted features : {feat}")
+
     output_str = crf.predict([feat])
-    print(output_str)
+    print(f" IOB Tagging : {output_str}")
+    
     result = []
     for token, tag in zip(tokens, output_str[0]):
         result.append((token, tag))

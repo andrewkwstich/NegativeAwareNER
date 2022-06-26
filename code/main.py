@@ -6,8 +6,9 @@ import Negation_Detector
 
 class Request(BaseModel):
     message:str
-    language:str = "English"
     correct_spellings:bool = True
+    with_negation = True
+    language:str = "English"
     negationStyle:str = "tags"
 
 class Response(BaseModel):
@@ -23,14 +24,10 @@ async def startup_event():
 @app.post("/extractInformation/")
 async def create_item(req: Request):
     ner_result = NER_Model.predict(req.message, req.correct_spellings)
-    result = Negation_Detector.predict(ner_result, req.negationStyle)
-    return result
-
-@app.post("/evaluate/")
-async def create_item(req: Request):
-    ner_result = NER_Model.predict(req.message, req.correct_spellings)
-    result = Negation_Detector.predict(ner_result, req.negationStyle)
-    return result
+    print(ner_result)
+    if req.with_negation:
+        return Negation_Detector.predict(ner_result, req.negationStyle)
+    return ner_result
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile):

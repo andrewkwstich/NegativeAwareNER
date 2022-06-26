@@ -8,6 +8,8 @@ import numpy as np
 from wordfreq import word_frequency
 from gensim.models.keyedvectors import KeyedVectors
 nlp = spacy.load("en_core_web_sm")
+
+#TODO Use different word embeddings
 import gensim.downloader as api
 glove_vectors=api.load("glove-wiki-gigaword-300")
 
