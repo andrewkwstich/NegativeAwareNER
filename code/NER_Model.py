@@ -331,17 +331,14 @@ spell2 = SpellChecker()
 def predict(sentence, correct_spellings=True):
     '''Predictions on the test set'''
     nlp = spacy.load('en_core_web_sm')
-    # Alternate option for spell checking :)
-    # contextualSpellCheck.add_to_pipe(nlp)
+    # Can change the option for spell checking :)
+    contextualSpellCheck.add_to_pipe(nlp)
     input_str = sentence
     doc = nlp(input_str)
     print(type(doc))
     tokens = []
-    if correct_spellings:
-        for text in doc:
-            print(f"{text} changed to : ")
-            print(spell2.correction(text))
-            tokens.append(spell2.correction(text))
+    if correct_spellings and doc._.performed_spellCheck:
+        tokens = [token.text for token in nlp(doc._.outcome_spellCheck)]
     else:
         tokens = [token.text for token in doc]
     
