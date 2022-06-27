@@ -96,6 +96,9 @@ def transform_sentence(sent, for_evaluation=False):
     ["shirt"], ["red"]
     """
     
+    if sent == []:
+        return []
+    
     list_counter = 0
 
     final_list = []
@@ -381,12 +384,17 @@ def predict_one_sentence(sent, negators, output_style="tags", word_of_interest=N
     If `output_style="entities"`, outputs a list of positive entities and a list of negative entities.
     """
     
+    if len(sent) == 0:
+        if output_style == "tags":
+            return []
+        elif output_style == "entities":
+            return [], []
+    
     if len(sent[0]) == 3:
         active_sent = []
         for word, iob, neg in sent:
             active_sent.append((word, iob))
-    else:#new
-        active_sent = sent        
+            
     if word_of_interest == None:
         found = True
             
@@ -401,6 +409,12 @@ def predict_one_sentence(sent, negators, output_style="tags", word_of_interest=N
     if found:
         
         transformed_sent, entity_indices = transform_sentence(sent)
+        
+        if transformed_sent == []:
+            if output_style == "tags":
+                return []
+            elif output_style == "entities":
+                return [], []
 
         spacy_mapping = get_spacy_tokens(transformed_sent, entity_indices)
 
@@ -452,6 +466,7 @@ def predict_one_sentence(sent, negators, output_style="tags", word_of_interest=N
                         neg_ent_names.append(" ".join(word for word in transformed_sent[i]))
 
             return pos_ent_names, neg_ent_names
+
 
 
 def predict_sent_list(sent_list, negators, output_style="tags", word_of_interest=None):

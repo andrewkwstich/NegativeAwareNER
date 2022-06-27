@@ -64,16 +64,19 @@ def get_sim_freq(sent, i, taxon_dict, verbose=False):
         
     frequency = word_frequency(word.lemma_, "en") * 1000
     
-    if frequency != 0 and highest_similarity > 0:
+    if frequency != 0 and highest_similarity > 0 and highest_similarity != 1:
         sim_freq = highest_similarity / frequency / 10
     
+    elif highest_similarity == 1:
+        sim_freq = 1
+        
     else:
         sim_freq = 0
     
     zero = sim_freq == 0
     one = sim_freq == 1
-    tenth_half = sim_freq >= 0.1
-    half_one = sim_freq >= 0.5
+    tenth_half = sim_freq >= 0.1 and sim_freq != 1
+    half_one = sim_freq >= 0.5 and sim_freq != 1
     one_three = sim_freq > 1
     three_five = sim_freq >= 3
     five_ten = sim_freq >= 5
@@ -81,7 +84,7 @@ def get_sim_freq(sent, i, taxon_dict, verbose=False):
     
     return zero, one, tenth_half, half_one, one_three, three_five, five_ten, greater_than_ten
 
-def is_object(sent, i):
+def is_object(sent, i, n=0):
     """
     Returns whether the word at index i is an object, object modifier, or neither.
     These categories are more semantic than syntactic. For example, in a sentence such as "Does your X have Y attribute?",
@@ -90,14 +93,25 @@ def is_object(sent, i):
     
     sent = nlp(" ".join([str(tok) for tok in sent]))
     
+    attribute_list = ["size", "color", "colour", "material", "texture", "shape"]
+    
     if i >= len(sent):
         return "not_object"
+    
+    if n >= 10:
+        return "not_object"
+    
+    if sent[i].text in attribute_list:
+        return "object_modifier"
     
     if sent[i].dep_ == "pobj" and sent[i].head.text == "in" and sent[sent[i].head.i-1].lemma_ == "come":
         return "object_modifier"
     
+    elif sent[i].dep_ == "ROOT" and sent[i].pos_ == "NOUN":
+        return "object"
+    
     elif sent[i].dep_ in ["pobj", "dobj"] and sent[i].pos_ != "PRON":
-        if sent[i].head.dep_ in ["ROOT", "xcomp", "ccomp"] or sent[i].head.dep_ == "conj" and sent[i].head.head.dep_ in ["ROOT", "xcomp", "ccomp"]:
+        if sent[i].head.dep_ in ["ROOT", "xcomp", "ccomp"] or (sent[i].head.dep_ == "conj" and sent[i].head.head.dep_ in ["ROOT", "xcomp", "ccomp"]):
             if sent[i].head.dep_ in ["ROOT", "xcomp", "ccomp"]:
                 head_lemma = sent[i].head.lemma_
             elif sent[i].head.dep_ == "conj" and sent[i].head.head.dep_ in ["ROOT", "xcomp", "ccomp"]:
@@ -125,41 +139,53 @@ def is_object(sent, i):
             else:
                 return "object_modifier"
         
-        elif is_object(sent, sent[i].head.i-1) in ["object", "object_modifier"]:
+        elif is_object(sent, sent[i].head.i-1, n+1) in ["object", "object_modifier"]:
             return "object_modifier"
         
         elif sent[i].head.text == "of" and sent[i].head.head.text == "any" and sent[i].head.head.dep_ == "nsubj":
             return "object"
         
         elif sent[i].head.text == "than" and sent[i].head.head.dep_ == "acomp":
-            if is_object(sent, sent[i].head.head.head.i) == "object":
+            if is_object(sent, sent[i].head.head.head.i, n+1) == "object":
                 return "object"
-            elif is_object(sent, sent[i].head.head.head.head.i) == "object":
+            elif is_object(sent, sent[i].head.head.head.head.i, n+1) == "object":
                 return "object"
         
         else:
             return "not_object"
         
-    elif sent[i].dep_ == "punct" and sent[i].head.dep_ == "nummod":
-        return "object_modifier"
-
+    elif sent[i].dep_ == "punct":
+        if sent[i].head.dep_ == "nummod":
+            return "object_modifier"
+        elif sent[i].text == "-":
+            if is_object(sent, sent[i].head.i, n+1) in ["object", "object_modifier"]:
+                return "object_modifier"
+            else:
+                return "not_object"
+        else:
+            return "not_object"
+        
+            
     elif "mod" in sent[i].dep_:
-        if is_object(sent, i+1) in ["object", "object_modifier"]:
+        if is_object(sent, i+1, n+1) in ["object", "object_modifier"]:
             return "object_modifier"
         else:
             return "not_object"
         
     elif sent[i].dep_ == "compound":
-        if is_object(sent, i+1) in ["object", "object_modifier"]:
+        if is_object(sent, i+1, n+1) in ["object", "object_modifier"]:
             return "object_modifier"
         else:
             return "not_object"
 
     elif sent[i].dep_ in ["conj", "appos"] and (sent[i].pos_ != "VERB" or sent[i].tag_ in ["VBG", "VBN"]):
-        return is_object(sent, sent[i].head.i)
+        if is_object(sent, sent[i].head.i, n+1) == "object" and sent[i].pos_ in ["NUM", "ADJ"] and sent[i].head.pos_ == "NOUN":
+            return "object_modifier"
+        else:
+            return is_object(sent, sent[i].head.i, n+1)
     
     elif sent[i].dep_ == "relcl" and (sent[i].pos_ != "VERB" or sent[i].tag_ in ["VBG", "VBN"]):
-        if is_object(sent, sent[i].head.i) in ["object_modifier", "object"]:
+        if is_object(sent, sent[i].head.i, n+1) in ["object_modifier", "object"]:
             return "object_modifier"
         else:
             return "not_object"
