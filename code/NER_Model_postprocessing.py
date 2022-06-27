@@ -11,7 +11,7 @@ color_list.remove("linen")
 color_list.remove("jet")
 color_list.remove("quartz")
 
-def tag_color(sent, color_list):
+def tag_color(sent):
     """
     Uses a color list to identify colors in the input data.
     Colors can be multiple words long; scans with an appropriate window size for each color.

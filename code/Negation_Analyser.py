@@ -324,7 +324,7 @@ def get_spacy_tokens(transformed_sent, entity_indices):
     string_sent = " ".join([item for sublist in transformed_sent for item in sublist])
     doc = nlp(string_sent)
     
-    spacy_special = ["'", '"', ":", ";", ",", "?", "!", ".", "n't", "'m", " "]
+    spacy_special = [ ":", ";", ",", "?", "!", ".", "n't", "'m", " "]#"'", '"',
     
     for ent_idx in entity_indices:
         substring = " ".join([item for item in transformed_sent[ent_idx]])
