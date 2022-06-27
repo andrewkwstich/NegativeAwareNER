@@ -200,6 +200,7 @@ tok_tag_act = []
 tokens = []
 actual_tags = []
 predicted_tags = []
+evaluation_res = {"Token":[], "Actual Tag":[], "Predicted Tag":[]}
 NER_Model.main()
 for index, row in validataion_df.iterrows():
     if row['Tokens'] is np.nan:
@@ -209,18 +210,24 @@ for index, row in validataion_df.iterrows():
         pred_tok_tag = Negation_Analyser.predict(predicted_ner, "tags")
         for tag in pred_tok_tag['token-tags']:
             predicted_tags.append(tag[1])
+            evaluation_res["Predicted Tag"].append(tag[1])
         print(f"Predicted : {pred_tok_tag}")
         sent = []
         tok_tag_act = []
 
     else:
         sent.append(row['Tokens'])
+        evaluation_res["Token"].append(row['Tokens'])
         if(row['is_negative'] is True):
             tok_tag_act.append((row['Tokens'], row['Tags'].replace('I-', 'I-N-')))
             actual_tags.append(row['Tags'].replace('I-', 'I-N-'))
+            evaluation_res["Actual Tag"].append(row['Tags'].replace('I-', 'I-N-'))
         else:
             actual_tags.append(row['Tags'])    
             tok_tag_act.append((row['Tokens'], row['Tags']))
+            evaluation_res["Actual Tag"].append(row['Tags'])
 
 
 evaluate(actual_tags, predicted_tags)
+res_df = pd.DataFrame(evaluation_res)
+res_df.to_csv('data/combined_evaluation.csv',index=False)

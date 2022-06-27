@@ -350,15 +350,18 @@ def predict(sentence, correct_spellings=True):
 
     output_str = crf.predict([feat])
     print(f" IOB Tagging : {output_str}")
-    output_str = NER_Model_postprocessing.tag_color(output_str)
-    output_str = NER_Model_postprocessing.tag_price(output_str)
-    output_str = NER_Model_postprocessing.tag_shape(output_str)
-    output_str = NER_Model_postprocessing.tag_size(output_str)
-
-    print(f"Postprocessed output: {output_str}")
     result = []
+
     for token, tag in zip(tokens, output_str[0]):
         result.append((token, tag))
+    
+    result = NER_Model_postprocessing.tag_color(result)
+    result = NER_Model_postprocessing.tag_price(result)
+    result = NER_Model_postprocessing.tag_shape(result)
+    result = NER_Model_postprocessing.tag_size(result)
+
+    print(f"Postprocessed output: {result}")
+
     return result
 
 def evaluate_results(token_list):
