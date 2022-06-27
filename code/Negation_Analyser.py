@@ -384,12 +384,15 @@ def predict_one_sentence(sent, negators, output_style="tags", word_of_interest=N
     If `output_style="entities"`, outputs a list of positive entities and a list of negative entities.
     """
     
+
     if len(sent) == 0:
         if output_style == "tags":
             return []
         elif output_style == "entities":
             return [], []
     
+    active_sent = sent
+
     if len(sent[0]) == 3:
         active_sent = []
         for word, iob, neg in sent:
@@ -408,7 +411,7 @@ def predict_one_sentence(sent, negators, output_style="tags", word_of_interest=N
     
     if found:
         
-        transformed_sent, entity_indices = transform_sentence(sent)
+        transformed_sent, entity_indices = transform_sentence(active_sent)
         
         if transformed_sent == []:
             if output_style == "tags":
