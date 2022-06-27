@@ -3,6 +3,7 @@
 import pandas as pd
 import os
 import nltk
+from spellchecker import SpellChecker
 import new_crf_functions
 from spacy.tokenizer import Tokenizer
 from sklearn.pipeline import Pipeline
@@ -30,7 +31,7 @@ crf = sklearn_crfsuite.CRF(
         all_possible_transitions=True,
         verbose = True
     )
-
+spell2 = SpellChecker()
 
 ### Creating features using knowledge bases
 
@@ -324,14 +325,23 @@ def main():
 
     print(test_dataset)
 
+
+spell2 = SpellChecker()
+
 def predict(sentence, correct_spellings=True):
     '''Predictions on the test set'''
     nlp = spacy.load('en_core_web_sm')
-    contextualSpellCheck.add_to_pipe(nlp)
+    # Alternate option for spell checking :)
+    # contextualSpellCheck.add_to_pipe(nlp)
     input_str = sentence
     doc = nlp(input_str)
+    print(type(doc))
+    tokens = []
     if correct_spellings:
-        tokens = [token.text for token in nlp(doc._.outcome_spellCheck)]
+        for text in doc:
+            print(f"{text} changed to : ")
+            print(spell2.correction(text))
+            tokens.append(spell2.correction(text))
     else:
         tokens = [token.text for token in doc]
     
@@ -343,7 +353,7 @@ def predict(sentence, correct_spellings=True):
 
     output_str = crf.predict([feat])
     print(f" IOB Tagging : {output_str}")
-    
+
     result = []
     for token, tag in zip(tokens, output_str[0]):
         result.append((token, tag))

@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 import aiofiles
 from pydantic import BaseModel
 import NER_Model
-import Negation_Detector
+import Negation_Analyser
 
 class Request(BaseModel):
     message:str
@@ -26,7 +26,7 @@ async def create_item(req: Request):
     ner_result = NER_Model.predict(req.message, req.correct_spellings)
     print(ner_result)
     if req.with_negation:
-        return Negation_Detector.predict(ner_result, req.negationStyle)
+        return Negation_Analyser.predict(ner_result, req.negationStyle)
     return ner_result
 
 @app.post("/uploadfile/")
