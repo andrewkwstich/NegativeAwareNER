@@ -1,6 +1,12 @@
 # NegativeAwareNER
-Developing a negation-aware named entity recognition system in the product search context
+Developing a negation-aware named entity recognition system in the product search context.
 
+This system was created for a group UBC MDS-CL Capstone project in collaboration with Heyday by Hootsuite. The code used in the final product is found in the `code` folder (not inside `intermediate`). Of the files in `code`, I (Andrew) was mainly responsible for the following four:
+
+- NER_Model_postprocessing.py
+- Negation_Analyzer.py
+- generating_dpt_store_centroids.ipynb
+- new_crf_functions.py
 
 ## Steps to setup the project
 
